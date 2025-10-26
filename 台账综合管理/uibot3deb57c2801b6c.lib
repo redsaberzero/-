@@ -1,0 +1,1282 @@
+dim m = ""
+dim iRet = ""
+dim 配置表 = ""
+dim 配置表路径 = ""
+dim 台账路径 = ""
+dim 内容汇总 = ""
+dim 获取txt = ""
+dim 写入txt集合 = ""
+dim 台账工作表模板 = ""
+dim 目标文件合集 = ""
+dim 目标文件数 = ""
+dim 读文档规则 = ""
+dim 读表格规则 = ""
+dim 台账 = ""
+dim 台账工作表 = ""
+dim 最后word = ""
+dim 总表导出规则工作表 = ""
+dim 目标总表 = ""
+dim 读总表导出规则 = ""
+dim 读总表规则序号 = ""
+dim 功能2_输出模板 = ""
+dim 功能2_输出工作表名称 = ""
+dim 功能2_输出现有表格路径 = ""
+dim 功能2_输出新文件路径 = ""
+dim 模板表 = ""
+dim 输出目标 = ""
+dim 功能1_打开路径 = ""
+dim 写入路径 = ""
+dim 空值判断 = ""
+dim 写入台账位置 = ""
+dim bRet = ""
+dim 处理后文本 = ""
+dim arrRet = ""
+dim 写入台账位置数组 = ""
+dim 删减文本 = ""
+dim 数组判断 = ""
+dim sRet = ""
+dim 切分后数组 = ""
+dim 当前写入位置判断 = ""
+dim 当前写入位置数组判断 = ""
+dim 最后字段 = ""
+dim 切分格式数组长度 = ""
+dim 实际写入位置 = ""
+dim 实际写入位置判断 = ""
+dim 当前写入位置长度 = ""
+dim 时间表头参数 = ""
+dim 切分格式 = ""
+dim word输出 = ""
+dim 剩余字段 = ""
+dim 最后字段长度 = ""
+dim 功能0_打开路径 = ""
+
+txt配置路径 = "D:\\Documents\\脚本配置.txt"
+功能1_规则选取 = 1
+Function 配置txt属性(txt路径)
+txt字典 = {}
+脚本配置判断 = File.Exists(txt路径)
+If 脚本配置判断=false
+ 
+File.Create(txt路径)
+Else
+ 
+End If
+txt内容 = File.Read(txt路径,"gbk")
+txt内容 = Split(txt内容,"\n")
+For Each 当前值 In txt内容
+数组字典转换 = Split(当前值,"：")
+数组字典转换长度 = UBound(数组字典转换)
+If 数组字典转换长度 = 1
+ 
+txt字典[数组字典转换[0]] = 数组字典转换[1]
+Else
+ 
+End If
+ 
+Next
+return txt字典
+ 
+End Function
+Function 空值转换(输入字符)
+空值判断 = IsNull(输入字符)
+If 空值判断=true
+输入字符 = ""
+ 
+Else
+ 
+End If
+ 
+return 输入字符
+End Function
+Function 裁剪文件路径(路径)
+右侧斜杠位置 = InStrRev(路径,"\\",1,false)
+路径 = SubString(路径,1,右侧斜杠位置+1)
+return 路径
+End Function
+
+Function 验证文件或创建(文件名,输入路径)
+If 输入路径 = null 
+输入路径 = ""
+ 
+Else
+ 
+End If
+输入路径判断 = File.Exists(输入路径)
+If 输入路径判断=false
+输出路径 = Dialog.OpenFile("","任意文件|*","初次运行需手选"&文件名&"，后续可在txt配置文件中再次修改。")
+ 
+Else
+ 
+输出路径 = 输入路径
+End If
+ 
+return [文件名,输出路径]
+End Function
+Function 日期转化(输入时间,递增天数,递增参数)
+If 输入时间 = 0 
+获取日期 = Time.Date()
+获取日期 = 获取日期+递增天数*(递增参数-1)
+Else
+获取日期 = 输入时间
+End If 
+汉字库 = ["零","一","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六","十七","十八","十九","二十","二十一","二十二","二十三","二十四","二十五","二十六","二十七","二十八","二十九","三十","三十一"]
+    字库长度 = Len(汉字库)
+    获取日期 = Time.Format(获取日期,"yyyy年mm月dd日")
+    年 = Mid(获取日期,1,4)
+    月 = Mid(获取日期,6,2)
+    日 = Mid(获取日期,9,2)
+    数字年 = []
+    For i = 1 To 4 step 1 
+        数字年[i-1] = Mid(年,i,1)
+        数字年[i-1] = CInt(数字年[i-1])
+    
+    Next
+    月 = CInt(月)
+    日 = CInt(日)
+普通日期 = 年&"年"&月&"月"&日&"日"
+
+    普通日期 = CStr(普通日期)
+年份格式 = "["&年&"]"
+    大写日期 = 汉字库[数字年[0]]&汉字库[数字年[1]]&汉字库[数字年[2]]&汉字库[数字年[3]]&"年"&汉字库[月]&"月"&汉字库[日]&"日"
+return [普通日期,大写日期,年份格式]
+End Function
+Function word内容输出(word输出)
+ 
+word输出 = Replace(word输出,"　","|",false)
+word输出 = Replace(word输出,"","|",false)
+word输出 = Replace(word输出,"\r","",false)
+word输出 = Replace(word输出,"| |","|",false)
+分隔符查重 = InStr(word输出,"||",1,false)
+Do While 分隔符查重>0
+ 
+word输出 = Replace(word输出,"||","|",false)
+分隔符查重 = InStr(word输出,"||",1,false)
+Loop
+return word输出
+End Function
+
+Function 字符串抓取(字符串,截取方式,前文,后文,长度)
+If 截取方式 = ""
+ 
+return ""
+Else
+ 
+End If
+筛选符号 = ["：","|"]
+筛选符号数 = UBound(筛选符号)
+前文长度 = Len(前文)
+前文位置 = InStr(字符串,前文,1,false)
+If 截取方式 = "按后文"
+ 
+截取长度 = 0
+后文位置 = InStr(字符串,后文,1,false)
+Else
+ 
+End If
+If 截取方式 = "按字数"
+ 
+截取长度 = 长度
+Else
+ 
+End If
+筛选长度 = 0
+If 截取长度>0
+Rem  根据【长度】截取
+ 
+输出字符串 = SubStr(字符串,前文位置+前文长度,截取长度)
+处理字符串 = 输出字符串
+For i = 0 To 筛选符号数 step 1 
+筛选位置 = InStr(处理字符串,筛选符号[i],1,false)
+处理字符串长度 = Len(处理字符串)
+Do While 筛选位置>0
+ 
+处理字符串 = SubStr(处理字符串,筛选位置+1,处理字符串长度-筛选位置)
+处理字符串长度 = Len(处理字符串)
+筛选长度 = 筛选长度+1
+筛选位置 = InStr(处理字符串,筛选符号[i],1,false)
+Loop
+ 
+Next
+If 筛选长度>0
+ 
+输出字符串 = SubStr(字符串,前文位置+前文长度,截取长度+筛选长度)
+For i = 0 To 筛选符号数 step 1 
+输出字符串 = Replace(输出字符串,筛选符号[i],"",false)
+ 
+Next
+Else
+ 
+End If
+Else
+ 
+Rem   根据【后文】截取
+输出字符串 = SubString(字符串,前文位置+前文长度,后文位置+筛选长度)
+处理字符串 = 输出字符串
+For i = 0 To 筛选符号数 step 1 
+筛选位置 = InStr(处理字符串,筛选符号[i],1,false)
+If 筛选位置>0
+ 
+筛选长度 = 筛选长度+1
+Else
+ 
+End If
+ 
+Next
+If 筛选长度>0
+ 
+For i = 0 To 筛选符号数 step 1 
+输出字符串 = Replace(输出字符串,筛选符号[i],"",false)
+ 
+Next
+Else
+ 
+End If
+End If
+ 
+return 输出字符串
+End Function
+
+Function 切分后写入(输入字段,切分格式)
+切分后数组 = []
+切分格式数组 = Split(切分格式,"-")
+切分格式数组长度 = UBound(切分格式数组)
+For i = 0 To 切分格式数组长度-1 step 1
+前文 = 切分格式数组[i]
+后文 = 切分格式数组[i+1]
+切分后数组[i] = 字符串抓取(输入字段,"按后文",前文,后文,0)
+Next
+TracePrint(切分后数组)
+最后字段 = 切分格式数组[切分格式数组长度]
+输入字段长度 = Len(输入字段)
+最后字段长度 = Len(最后字段)
+结尾定位 = InStrRev(输入字段,最后字段,1,false)
+If 结尾定位+最后字段长度-1<输入字段长度
+ 
+剩余字段 = SubStr(输入字段,(结尾定位+最后字段长度),输入字段长度-(结尾定位+最后字段长度-1))
+切分后数组 = push(切分后数组,剩余字段)
+Else
+ 
+End If
+ 
+return 切分后数组
+End Function
+Function 增加文本脚本(原文本,增加格式,通配符)
+If 增加格式=""
+return 原文本
+ 
+Else
+ 
+End If
+If 原文本 = null
+原文本 = ""
+ 
+Else
+ 
+End If
+原文本 = Replace(原文本," ","",false)
+合并后文本 = Replace(增加格式,通配符,原文本,false)
+合并后文本 = Replace(合并后文本,"-","",false)
+return 合并后文本
+
+End Function
+Function 删减文本脚本(原文本,删减条件,通配符)
+删减后文本 = 原文本
+删减条件 = Split(删减条件,",")
+删减长度 = UBound(删减条件)
+For 删减指针 = 0 To 删减长度 step 1 
+删减内容 = 删减条件[删减指针]
+通配符判断 = InStr(删减内容,通配符,1,false)
+If 通配符判断>0
+ 
+新删减内容 = ""
+删减内容数组 = Split(删减内容,"*")
+For Each 数组当前值 In 删减内容数组
+If 数组当前值 = 删减内容数组[0]
+新删减内容 = 数组当前值
+ 
+Else
+ 
+新删减内容 = 新删减内容&"\\d\\"&数组当前值
+End If
+ 
+Next
+新删减内容 = "\\"&新删减内容
+新删减查询 = Regex.Find(删减后文本,新删减内容)
+删减后文本 = Replace(删减后文本,新删减查询[0],"",false)
+Else
+ 
+删减后文本 = Replace(删减后文本,删减内容,"",false)
+End If
+ 
+Next
+return 删减后文本
+ 
+End Function
+Function 读表格全部内容(输入表格,工作表名称)
+工作表 = 工作表名称
+行数 = Excel.GetRowsCount(输入表格,工作表)
+列数 = Excel.GetColumsCount(输入表格,工作表)
+表格数组 = Excel.ReadRange(输入表格,工作表,[[1,1],[行数,列数]])
+return 表格数组
+End Function
+
+
+Function 表格匹配(输入规则,目标文件名)
+打开表格 = Excel.OpenExcel(目标文件名,true)
+目标文件名数组 = Split(目标文件名,"\\")
+目标文件名数组长度 = UBound(目标文件名数组)
+目标文件名 = 目标文件名数组[目标文件名数组长度]
+写入位置 = []
+写入内容 = []
+提取规则 = []
+提取规则数 = 0
+规则数组判断 = IsArray(输入规则)
+If 规则数组判断 = false
+iRet = Dialog.MsgBox("输入规则不是数组","发生错误","0","1",0)
+exit()
+ 
+Else
+ 
+End If
+规则列 = {}
+规则列["序号"] = 0
+规则列["文件名关键字"] = 1
+规则列["目标工作表"] = 2
+规则列["读取单元格"] = 3
+规则列["查找关键字"] = 4
+规则列["增加文本"] = 5
+规则列["删减文本"] = 6
+规则列["写入台账位置"] = 7
+规则列["切分格式"] = 8
+表格规则行数 = UBound(输入规则)
+////// --------------根据文件名关键字筛选------------------
+For i = 0 To 表格规则行数 step 1 
+文件名关键字 = 输入规则[i][规则列["文件名关键字"]]
+文件名关键字判断 = InStr(目标文件名,文件名关键字,1,false)
+If 文件名关键字判断>0
+提取规则[提取规则数] = 输入规则[i]
+提取规则数 = 提取规则数+1
+ 
+Else
+ 
+End If
+ 
+Next
+ For 行数 = 0 To 提取规则数-1 step 1 
+序号 = 提取规则[行数][规则列["序号"]]
+目标工作表 = 提取规则[行数][规则列["目标工作表"]]
+读取单元格 = 提取规则[行数][规则列["读取单元格"]]
+查找文本中关键字 = 提取规则[行数][规则列["查找关键字"]]
+增加文本 = 提取规则[行数][规则列["增加文本"]]
+删减文本 = 提取规则[行数][规则列["删减文本"]]
+写入台账位置 = 提取规则[行数][规则列["写入台账位置"]]
+切分格式 = 提取规则[行数][规则列["切分格式"]]
+If 目标工作表 = "" 
+ 
+所有工作表 = Excel.GetSheetsName(打开表格)
+目标工作表 = 所有工作表[0]
+Else
+ 
+End If
+If 读取单元格 <> "" 
+ 
+读取单元格内容 = Excel.ReadCell(打开表格,目标工作表,读取单元格)
+读取单元格内容数字判断 = Type(读取单元格内容)
+If 读取单元格内容数字判断="int"
+读取单元格内容 = CStr(读取单元格内容)
+Else
+End If
+If 查找文本中关键字 = "" 
+//TracePrint 读取单元格内容
+//TracePrint 增加文本
+处理后文本=增加文本脚本(读取单元格内容,增加文本,"*")
+//TracePrint 处理后文本
+If 删减文本<>""
+处理后文本=删减文本脚本(处理后文本,删减文本,"*")
+Else
+ 
+End If
+Else
+ 
+找到关键字 = InStr(读取单元格内容,查找文本中关键字,1,false)
+If 找到关键字>0
+ 
+处理后文本 = 增加文本
+Else
+ 
+处理后文本 = ""
+End If
+End If
+Else
+ 
+处理后文本 = 增加文本
+End If
+写入台账位置数组 = Split(写入台账位置,",")
+数组判断 = UBound(写入台账位置数组)
+If 数组判断>0
+写入位置[行数] = 写入台账位置数组
+If 切分格式<>""
+切分后数组 = 切分后写入(处理后文本,切分格式)
+写入内容[行数] = 切分后数组
+Else
+写入内容[行数] = 处理后文本
+End If
+ 
+Else
+ 
+写入位置[行数] = 写入台账位置
+写入内容[行数] = 处理后文本
+End If
+Next
+Excel.CloseExcel(打开表格,true)
+return [写入位置,写入内容]
+End Function
+Function 文档匹配(输入规则,目标文件名)
+目标文档 = Word.Open(目标文件名,"","",true)
+文档内容 = Word.ReadAll(目标文档)
+Word.Close(目标文档,false)
+打开文档内容 = word内容输出(文档内容)
+目标文件名数组 = Split(目标文件名,"\\")
+目标文件名数组长度 = UBound(目标文件名数组)
+目标文件名 = 目标文件名数组[目标文件名数组长度]
+写入位置 = []
+写入内容 = []
+提取规则 = []
+提取规则数 = 0
+规则数组判断 = IsArray(输入规则)
+If 规则数组判断 = false
+iRet = Dialog.MsgBox("输入规则不是数组","发生错误","0","1",0)
+exit()
+ 
+Else
+ 
+End If
+文档规则行数 = UBound(输入规则)
+规则列 = {}
+规则列["序号"] = 0
+规则列["文件名关键字"] = 1
+规则列["读取位置"] = 2
+规则列["截取方式"] = 3
+规则列["按字数截取"] = 4
+规则列["按后文截取"] = 5
+规则列["查找关键字"] = 6
+规则列["增加文本"] = 7
+规则列["删减文本"] = 8
+规则列["写入台账位置"] = 9
+规则列["切分格式"] = 10
+Rem --------------根据文件名关键字筛选------------------
+For i = 0 To 文档规则行数 step 1 
+文件名关键字 = 输入规则[i][规则列["文件名关键字"]]
+文件名关键字判断 = InStr(目标文件名,文件名关键字,1,false)
+If 文件名关键字判断>0
+提取规则[提取规则数] = 输入规则[i]
+提取规则数 = 提取规则数+1
+
+ 
+Else
+ 
+End If
+ 
+Next
+For 行数 = 0 To 提取规则数-1 step 1 
+序号 = 提取规则[行数][规则列["序号"]]
+读取位置 = 提取规则[行数][规则列["读取位置"]]
+截取方式 = 提取规则[行数][规则列["截取方式"]]
+按字数截取 = 提取规则[行数][规则列["按字数截取"]]
+按后文截取 = 提取规则[行数][规则列["按后文截取"]]
+查找文本中关键字 = 提取规则[行数][规则列["查找关键字"]]
+增加文本 = 提取规则[行数][规则列["增加文本"]]
+删减文本 = 提取规则[行数][规则列["删减文本"]]
+写入台账位置 = 提取规则[行数][规则列["写入台账位置"]]
+切分格式 = 提取规则[行数][规则列["切分格式"]]
+抓取内容 = 字符串抓取(打开文档内容,截取方式,读取位置,按后文截取,按字数截取)
+If 查找文本中关键字 = "" 
+//TracePrint 读取单元格内容
+//TracePrint 增加文本
+处理后文本=增加文本脚本(抓取内容,增加文本,"*")
+//TracePrint 处理后文本
+If 删减文本<>""
+处理后文本=删减文本脚本(处理后文本,删减文本,"*")
+Else
+ 
+End If
+ 
+Else
+ 
+处理后文本 = 增加文本
+End If
+写入台账位置数组 = Split(写入台账位置,",")
+数组判断 = UBound(写入台账位置数组)
+If 数组判断>0
+写入位置[行数] = 写入台账位置数组
+If 切分格式<>""
+切分后数组 = 切分后写入(处理后文本,切分格式)
+写入内容[行数] = 切分后数组
+Else
+写入内容[行数] = 处理后文本
+End If
+ 
+Else
+ 
+写入位置[行数] = 写入台账位置
+写入内容[行数] = 处理后文本
+End If
+Next
+return [写入位置,写入内容]
+End Function
+Function 根据规则录入台账(输入汇总,目标台账,目标工作表,时间关键字,时间递增,录入起始行,序号列名,自定义公式,自定义公式列)
+表头坐标 = [1,1]
+输出工作表 = 目标工作表
+If 录入起始行=""
+ 
+已有行数 = Excel.GetRowsCount(目标台账,输出工作表)
+已有行数 = 已有行数-1
+Else
+ 
+已有行数 = 录入起始行-1
+End If
+输出工作表列数 = Excel.GetColumsCount(目标台账,输出工作表)
+表头数组 = Excel.ReadRow(目标台账,输出工作表,表头坐标)
+表头数组长度 = UBound(表头数组)
+表头名称对应 = {}
+For 表头指针 = 0 To 表头数组长度 step 1 
+表头名称对应[表头数组[表头指针]] = 表头指针
+ 
+Next
+//TracePrint(表头名称对应)
+全部数量 = Len(输入汇总)
+Excel.SelectRange(目标台账,输出工作表,[[已有行数+1,1],[已有行数+1,输出工作表列数]])
+Keyboard.Press("C", "press", ["Ctrl"],{"iDelayAfter":300,"iDelayBefore":200,"sSimulate":"simulate"})
+Excel.SelectRange(目标台账,输出工作表,[[已有行数+2,1],[已有行数+1+全部数量,输出工作表列数]])
+Keyboard.Press("V", "press", ["Ctrl"],{"iDelayAfter":300,"iDelayBefore":200,"sSimulate":"simulate"})
+Keyboard.Press("Delete", "press", [],{"iDelayAfter":300,"iDelayBefore":200,"sSimulate":"simulate"})
+If 序号列名<>""
+ 
+If 表头名称对应[序号列名]<>null
+ 
+最后序号 = Excel.ReadCell(目标台账,输出工作表,[已有行数+1,表头名称对应[序号列名]+1])
+最后序号 = CInt(最后序号)
+For i = 1 To 全部数量 step 1 
+ 
+Excel.WriteCell(目标台账,输出工作表,[已有行数+1+i,表头名称对应[序号列名]+1],最后序号+i,false)
+Next
+Else
+ 
+End If
+Else
+ 
+End If
+For 行指针 = 0 To 全部数量-1 step 1 
+ 
+当前输入汇总 = 输入汇总[行指针]
+写入位置 = 当前输入汇总[0]
+写入内容 = 当前输入汇总[1]
+写入列数 = UBound(写入位置)
+时间表头参数 = 0
+For 写入指针 = 0 To 写入列数 step 1 
+当前写入内容 = 写入内容[写入指针]
+当前写入位置 = 写入位置[写入指针]
+当前写入位置数组判断 = IsArray(当前写入位置)
+If 当前写入位置数组判断=true
+当前写入内容数组判断 = IsArray(当前写入内容)
+当前写入位置长度 = UBound(当前写入位置)
+If 当前写入内容数组判断=true
+Rem 多个内容写入多个位置，按数组下标顺序录入
+当前写入内容长度 = UBound(当前写入内容)
+If 当前写入位置长度>当前写入内容长度
+For q = 0 To 当前写入位置长度-当前写入内容长度 step 1 
+ 
+当前写入内容 = push(当前写入内容,"")
+Next
+ 
+Else
+ 
+End If
+For m = 0 To 当前写入位置长度 step 1 
+实际写入位置 = 当前写入位置[m]
+实际写入内容 = 当前写入内容[m]
+ 
+实际写入位置判断 = InStr(实际写入位置,时间关键字,1,false)
+If 实际写入位置判断>0
+实际写入内容 = Time.CDate(实际写入内容, "yyyy.mm.dd.hh.mm.ss")
+实际写入内容 = 日期转化(实际写入内容,时间递增,0)
+实际写入内容 = 实际写入内容[0]
+Else
+ 
+End If
+                                
+    If 表头名称对应[写入位置[写入指针][m]] = null
+ 
+iRet = Dialog.MsgBox("台账中未找到【"&写入位置[写入指针]&"】列！请检查配置规则是否有误。","错误","0","1",0)
+exit()
+Else
+ 
+Excel.WriteCell(目标台账,输出工作表,[行指针+2+已有行数,表头名称对应[写入位置[写入指针][m]]+1],实际写入内容,false)
+End If
+ 
+Next
+ 
+Else
+ 
+Rem 同一内容写入多个位置
+For m = 0 To 当前写入位置长度 step 1 
+实际写入位置 = 当前写入位置[m]
+ 
+实际写入位置判断 = InStr(实际写入位置,时间关键字,1,false)
+If 实际写入位置判断>0
+时间表头参数 = 时间表头参数+1
+当前写入内容 = Time.CDate(当前写入内容, "yyyy.mm.dd.hh.mm.ss")
+当前写入内容 = 日期转化(当前写入内容,时间递增,时间表头参数)
+当前写入内容 = 当前写入内容[0]
+Else
+ 
+End If
+                                
+    If 表头名称对应[写入位置[写入指针][m]] = null
+ 
+iRet = Dialog.MsgBox("台账中未找到【"&写入位置[写入指针]&"】列！请检查配置规则是否有误。","错误","0","1",0)
+exit()
+Else
+ 
+Excel.WriteCell(目标台账,输出工作表,[行指针+2+已有行数,表头名称对应[写入位置[写入指针][m]]+1],当前写入内容,false)
+End If
+Next
+End If
+ 
+Else
+ 
+当前写入位置判断 = InStr(当前写入位置,时间关键字,1,false)
+If 当前写入位置判断>0
+时间表头参数 = 时间表头参数+1
+当前写入内容 = Time.CDate(当前写入内容, "yyyy.mm.dd.hh.mm.ss")
+当前写入内容 = 日期转化(当前写入内容,时间递增,时间表头参数)
+当前写入内容 = 当前写入内容[0]
+Else
+ 
+End If
+                                
+    If 表头名称对应[写入位置[写入指针]] = null
+ 
+iRet = Dialog.MsgBox("台账中未找到【"&写入位置[写入指针]&"】列！请检查配置规则是否有误。","错误","0","1",0)
+exit()
+Else
+ 
+Excel.WriteCell(目标台账,输出工作表,[行指针+2+已有行数,表头名称对应[写入位置[写入指针]]+1],当前写入内容,false)
+End If
+End If
+Next
+If 自定义公式<>""
+ 
+行指针字符 = CStr((行指针+2+已有行数))
+当前公式 = Replace(自定义公式,"-行数-",行指针字符,false)
+Excel.WriteCell(目标台账,输出工作表,[行指针+2+已有行数,表头名称对应[自定义公式列]+1],"="&当前公式,false)
+Else
+ 
+End If
+Next
+ 
+End Function
+Function 在表格中匹配标识符(输入表格数组,标识符)
+表格行数 = Len(输入表格数组)
+表格列数 = Len(输入表格数组[0])
+For 行指针 = 0 To 表格行数-1 step 1 
+For 列指针 = 0 To 表格列数-1 step 1 
+当前格内容 = 输入表格数组[行指针][列指针]
+标识符匹配 = InStr(当前格内容,标识符,1,false)
+If 标识符匹配>0
+冗余内容 = Replace(当前格内容,标识符,"",false)
+当前格坐标 = [行指针+1,列指针+1]
+return [当前格坐标,标识符,冗余内容]
+ 
+Else
+ 
+End If
+ 
+Next
+ 
+Next
+ 
+End Function
+Function 表格数组按文本定位坐标(表格数组,数组行数,数组列数,标记池)
+标记数 = UBound(标记池)
+_标记格 = {}
+For _字典指针 = 0 To 标记数 step 1 
+_标记格[标记池[_字典指针]] = []
+ 
+Next
+For _行指针 = 0 To 数组行数-1 step 1 
+表格数组当前行 = 表格数组[_行指针]
+For _列指针 = 0 To 数组列数-1 step 1 
+表格数组当前格 = 表格数组当前行[_列指针]
+ 
+For _标记指针 = 0 To 标记数 step 1 
+_标记 = 标记池[_标记指针]
+当前标记已匹配格 = _标记格[_标记]
+标记判断 = InStr(表格数组当前格,_标记,1,false)
+If 标记判断>0
+当前标记已匹配格 = push(当前标记已匹配格,[_行指针+1,_列指针+1])
+_标记格[_标记] = 当前标记已匹配格
+ 
+Else
+ 
+End If
+ 
+Next
+Next
+ 
+Next
+ 
+return _标记格
+End Function
+Function 根据模板规则读表导出(输入配置表,规则数组,待处理文件,输出目标表)
+Rem 读配置表中每个总表，将表头去掉标识符暂存为变量
+Dialog.Notify("正在运行，请稍候", "UiBot", "0")
+总表模板 = 规则数组[1]
+实际读取的工作表名 = 规则数组[2]
+If 实际读取的工作表名=""
+待处理文件工作表 = Excel.GetSheetsName(待处理文件)
+实际读取的工作表名 = 待处理文件工作表[0]
+ 
+Else
+ 
+End If
+输出模板 = 规则数组[3]
+读取写入标记 = 规则数组[4]
+读取写入标记池 = Split(读取写入标记,",")
+读取规则 = 规则数组[5]
+排序表头 = 规则数组[6]
+筛选表头 = 规则数组[7]
+筛选关键字 = 规则数组[8]
+筛选关键字组 = Split(筛选关键字,",")
+是否依据样表删减总表 = 规则数组[9]
+输出现有表格路径 = 规则数组[11]
+输出新文件路径 = 规则数组[12]
+新文件命名 = 规则数组[13]
+模板数组 = []
+模板表头内容去标记 = []
+模板行数 = Excel.GetRowsCount(输入配置表,总表模板)
+模板列数 = Excel.GetColumsCount(输入配置表,总表模板)
+模板数组 = Excel.ReadRange(输入配置表,总表模板,[[1,1],[模板行数,模板列数]])
+模板表头内容 = Excel.ReadRange(输入配置表,总表模板,[[1,1],[1,模板列数]])
+For Each 模板表头名 In 模板表头内容[0]
+For Each 标记 In 读取写入标记池
+模板表头名 = Replace(模板表头名,标记,"",false)
+ 
+Next
+ 
+模板表头内容去标记 = Unshift(模板表头内容去标记,模板表头名)
+Next
+待处理列数 = Excel.GetColumsCount(待处理文件,实际读取的工作表名)
+待处理文件数组 = Excel.ReadRange(待处理文件,实际读取的工作表名,[[1,1],[11,待处理列数]])
+待处理表头名称坐标组 = 表格数组按文本定位坐标(待处理文件数组,11,待处理列数,模板表头内容去标记)
+待处理表头格 = []
+//TracePrint(待处理表头名称坐标组)
+For Each 表头内容, 坐标组 In 待处理表头名称坐标组
+坐标组 = 坐标组[0] 
+待处理表头格 = push(待处理表头格,坐标组)
+Next
+Rem  根据散布坐标集中情况确定表头行数
+表头定位 = []
+For i = 0 To 10 step 1 
+表头定位[i] = 0
+ 
+Next
+For Each 坐标 In 待处理表头格
+当前行值 = 坐标[0]
+当前行值 = CInt(当前行值)
+If 当前行值<=10
+表头定位[当前行值] = 表头定位[当前行值]+1
+ 
+Else
+ 
+End If
+ 
+Next
+表头定位最值 = -1
+For i = 0 To 10 step 1 
+当前值 = 表头定位[i]
+If 表头定位最值<当前值
+表头定位最值 = 当前值
+ 
+定位表头行数 = i
+Else
+ 
+End If
+ 
+Next
+If 是否依据样表删减总表="是"
+Rem 根据坐标确定需要删除的行列
+If 定位表头行数>1
+ 
+For i = 定位表头行数-1 To 1 step -1 
+Excel.DeleteRow(待处理文件,实际读取的工作表名,i,false)
+ 
+Next
+Else
+ 
+End If
+ 
+For i = 待处理列数 To 1 step -1 
+删除标记 = true
+ 
+For Each 坐标 In 待处理表头格
+If i=坐标[1]
+删除标记 = false
+ 
+Else
+ 
+End If
+ 
+Next
+If 删除标记=true
+ 
+Excel.DeleteColumn(待处理文件,实际读取的工作表名,i,false)
+Else
+ 
+End If
+Next
+Else
+ 
+End If
+Rem 将标记池替换为文本，按表头文本获取标记格
+Rem  定位筛选列-part1
+If 筛选表头<>""
+读取写入标记池 = push(读取写入标记池,筛选表头)
+ 
+Else
+ 
+End If
+标记格 = 表格数组按文本定位坐标(模板数组,模板行数,模板列数,读取写入标记池)
+Rem   在需要输出的对象表格中也根据以上方法获取写入标记格
+输出模板行数 = Excel.GetRowsCount(输入配置表,输出模板)
+输出模板列数 = Excel.GetColumsCount(输入配置表,输出模板)
+输出模板数组 = Excel.ReadRange(输入配置表,输出模板,[[1,1],[输出模板行数,输出模板列数]])
+输出标记格 = 表格数组按文本定位坐标(输出模板数组,输出模板行数,输出模板列数,读取写入标记池)
+Excel.CloseExcel(输入配置表,false)
+CollectGarbage()
+If 排序表头<>""
+ 
+排序列 = 标记格[排序表头][0][1]
+Excel.SelectRange(待处理文件,实际读取的工作表名,"A"&排序列)
+Keyboard.Press("Alt", "press", [],{"iDelayAfter":200,"iDelayBefore":500,"sSimulate":"simulate"})
+Keyboard.Press("H", "press", [],{"iDelayAfter":100,"iDelayBefore":100,"sSimulate":"simulate"})
+Keyboard.Press("S", "press", [],{"iDelayAfter":100,"iDelayBefore":100,"sSimulate":"simulate"})
+Keyboard.Press("S", "press", [],{"iDelayAfter":100,"iDelayBefore":100,"sSimulate":"simulate"})
+Else
+ 
+End If
+Rem 已获取一个字典，包含每个标记和单元格的对应关系，接下来根据表格规则，读取标记一格/一列的内容
+标记格读取 = {}
+If 读取规则="读一列"
+开始行 = Dialog.InputBox("以excel表格左侧数字为准，输入0则读取从2开始所有行","输入需要读取的开始行数",0,true)
+空值判断 = IsNull(开始行)
+If 空值判断=true
+exit()
+ 
+Else
+ 
+开始行 = CInt(开始行)
+End If
+总行数 = Excel.GetRowsCount(待处理文件,实际读取的工作表名)
+If 开始行>0
+结束行 = Dialog.InputBox("以excel表格左侧数字为准，有效范围："&开始行&"~"&总行数,"输入需要读取的结尾行数",总行数,true)
+结束行 = CInt(结束行) 
+Else
+ 
+开始行 = 2
+结束行 = 总行数
+End If
+截取行数 = 结束行-开始行+1
+If 截取行数<1
+iRet = Dialog.MsgBox("结束行不能小于开始行","错误","0","1",0)
+ 
+Else
+ 
+End If
+For Each 标记, 坐标组 In 标记格
+记录列数组 = []
+For Each 坐标 In 坐标组
+ 
+列内容 = Excel.ReadColumn(待处理文件,实际读取的工作表名,坐标)
+列内容 = splice(列内容,开始行-1,结束行-1)
+记录列数组 = push(记录列数组,列内容)
+Next
+ 
+标记格读取[标记] = 记录列数组
+//TracePrint(记录列数组)
+Next
+Rem  定位筛选列-part2
+If 筛选表头<>""
+筛选格 = 标记格[筛选表头][0]
+筛选列读取 = Excel.ReadColumn(待处理文件,实际读取的工作表名,筛选格)
+筛选列读取 = splice(筛选列读取,开始行-1,结束行-1)
+ 
+Else
+ 
+End If
+ 
+Else
+ 
+End If
+ 
+Rem 将读取的内容在相同标记处写入（分为写入一行/一列的情况）
+读输出目标表工作表 = Excel.GetSheetsName(输出目标表)
+输出工作表名称 = 读输出目标表工作表[0]
+If 读取规则="读一列"
+Rem 如输出到单表则手动选行数，否则自动套用模板
+Rem 单表-按行输出到每一行
+Rem 多文件-按表输出每个坐标，另存为，再输出，循环
+输出数组 = 标记格读取
+输出数组行数 = 截取行数
+If 输出新文件路径<>""
+ 
+输出目标 = 模板表
+Else
+ 
+If 输出现有表格路径<>""
+输出开始行 = Dialog.InputBox("以excel表格左侧数字为准，输入0则读取从2开始所有行","输入自动填入的开始行数，注意不要覆盖了表头",0,true)
+输出目标 = 现有表格
+ 
+Else
+ 
+End If
+End If
+If 输出新文件路径<>""
+暂存模板 = 读表格全部内容(输出目标表,输出工作表名称)
+Else
+ 
+End If
+For 行指针 = 0 To 输出数组行数-1 step 1 
+If 筛选表头<>""
+筛选值 = 0
+For Each 关键字 In 筛选关键字组
+筛选判断 = InStr(筛选列读取[行指针],关键字,1,false)
+If 筛选判断>0
+筛选值 = 筛选值+筛选判断
+Break
+ 
+Else
+ 
+End If
+ 
+Next
+ 
+If 筛选值<=0
+Continue
+ 
+Else
+ 
+End If
+Else
+ 
+End If
+Dialog.Notify("正在进行"&"("&(行指针+1)&"/"&输出数组行数&")", "UiBot", "0")
+Excel.WriteRange(输出目标表,输出工作表名称,"A1",暂存模板,false)
+For Each 标记, 坐标组 In 输出标记格
+输出内容 = ""
+输出内容组 = 输出数组[标记]
+输出内容组判断 = IsNull(输出内容组)
+If 输出内容组判断=true
+输出内容组 = ""
+ 
+Else
+ 
+End If
+输出内容组判断 = IsArray(输出内容组)
+If 输出内容组判断=true
+ 
+输出内容组多重数组判断 = IsArray(输出内容组[0])
+If 输出内容组多重数组判断=true
+For Each 内容组细分 In 输出内容组
+ 
+输出内容 = 输出内容&内容组细分[行指针]
+Next
+ 
+Else
+ 输出内容 = 输出内容组[行指针]
+End If
+Else
+ 
+输出内容 = 输出内容组
+End If
+输出内容日期判断 = Time.IsDate(输出内容, "yyyy.mm.dd.hh.mm.ss")
+If 输出内容日期判断=true
+输出内容 = Time.CDate(输出内容, "yyyy.mm.dd.hh.mm.ss")
+输出内容 =  日期转化(输出内容,0,0)
+输出内容 = 输出内容[0]
+Else
+ 
+End If
+If 新文件命名<>""
+
+新文件格式判断 = InStr(新文件命名,标记,1,false)
+If 新文件格式判断>0
+If 新文件命名=标记
+另存为命名 = 输出内容
+Else 
+另存为命名 = 增加文本脚本(输出内容,新文件命名,标记)
+End If
+ 
+Else
+ 
+End If
+ 
+Else
+ 
+End If
+ 
+ 
+For Each 坐标 In 坐标组
+输出内容 = Replace(输出内容," ","",false)
+If 输出新文件路径<>""
+输出单元格格式 = Excel.ReadCell(输出目标表,输出工作表名称,坐标)
+输出单元格格式判断 = InStr(输出单元格格式,标记,1,false)
+If 输出单元格格式判断>0
+ 输出内容=增加文本脚本(输出内容,输出单元格格式,标记)
+Else
+ 
+End If
+ 
+Excel.WriteCell(输出目标表,输出工作表名称,坐标,输出内容,false)
+Else
+ 
+If 输出现有表格路径<>""
+Excel.WriteCell(输出目标表,输出工作表名称,[输出开始行+行指针+1+坐标[0],坐标[1]],输出内容,false)
+ 
+Else
+ 
+End If
+End If
+ 
+Next
+Next
+If 输出新文件路径<>""
+//TracePrint(输出新文件路径&另存为命名&".xls")
+临时文件路径 = 输出新文件路径&"脚本临时文件.xls"
+ 
+Excel.SaveOtherFile(输出目标表,临时文件路径)
+File.Rename(临时文件路径,输出新文件路径&另存为命名&".xls",false)
+Else
+ 
+End If
+Next
+ 
+Else
+ 
+End If
+If 输出新文件路径<>""
+Excel.CloseExcel(输出目标表,true)
+File.Delete(输出新文件路径&"脚本临时文件.xls")
+//TracePrint(输出新文件路径&另存为命名&".xls")
+ 
+Else
+ 
+End If
+ 
+End Function
+Rem 
+Rem 
+Rem 
+Rem  ------===【定位配置表】===------
+写入txt集合 = []
+获取txt = 配置txt属性(txt配置路径)
+配置表路径 = 获取txt["配置表路径"]
+配置表路径数组 = 验证文件或创建("配置表路径",配置表路径)
+配置表路径 = 配置表路径数组[1]
+写入txt集合[0] = Join(配置表路径数组,"：")
+功能1_打开路径 = 获取txt["功能1_打开路径"]
+功能2_打开路径 = 获取txt["功能2_打开路径"]
+功能1_打开路径 = 空值转换(功能1_打开路径)
+功能2_打开路径 = 空值转换(功能2_打开路径)
+写入txt集合[1] = "功能1_打开路径："&功能1_打开路径
+写入txt集合[2] = "功能2_打开路径："&功能2_打开路径
+Rem  ------===【 正式开始运行】===------
+m  = "输入数字"
+Do While m = "输入数字" 
+    m = Dialog.InputBox("1=读取多文件并集中到总表；2=总表内容转移或分散到多个文件","自动运行前，请确保表格均已保存关闭。长按Ctrl+F12中断运行。","输入数字",true)
+Loop
+If m = null
+    exit()
+Else
+ 
+End If
+配置表 = Excel.OpenExcel(配置表路径,true)
+If m = "1"
+ 
+读取文件汇总规则 = "功能1配置"
+Excel.ActiveSheet(配置表,读取文件汇总规则)
+读读取汇总规则 = 读表格全部内容(配置表,读取文件汇总规则)
+读读取汇总规则 = 读读取汇总规则[功能1_规则选取]
+功能1_导入台账路径 = 读读取汇总规则[3]
+功能1_导入工作表名称 = 读读取汇总规则[4]
+功能1_录入起始行 = 读读取汇总规则[5]
+功能1_续写序号列 = 读读取汇总规则[6]
+功能1_自定义公式 = 读读取汇总规则[7]
+功能1_自定义公式列 = 读读取汇总规则[8]
+功能1_时间关键字 = 读读取汇总规则[9]
+功能1_时间递增 = 读读取汇总规则[10]
+If 功能1_时间关键字 = ""
+    功能1_时间关键字 = -1
+End If
+最后word = ""
+目标文件合集 = Dialog.OpenFiles(功能1_打开路径,"*.*","选择需要读取的文件")
+目标文件数 = UBound(目标文件合集)
+If 目标文件数=-1
+exit()
+ 
+Else
+写入路径 = 裁剪文件路径(目标文件合集[0])
+写入txt集合[1] = "功能1_打开路径："&写入路径
+End If
+读文档规则 = 读表格全部内容(配置表,"读取-文档")
+读表格规则 = 读表格全部内容(配置表,"读取-表格")
+Excel.CloseExcel(配置表,false)
+台账 = Excel.OpenExcel(功能1_导入台账路径,true)
+If 功能1_导入工作表名称<>""
+ 
+台账工作表 = 功能1_导入工作表名称
+Else
+ 
+台账全部工作表 = Excel.GetSheetsName(台账)
+台账工作表 = 台账全部工作表[0]
+End If
+内容汇总 = []
+For 文件指针 = 0 To 目标文件数 step 1 
+ 
+目标文件 = 目标文件合集[文件指针]
+文档判断 = InStr(目标文件,".doc",1,false)
+If 文档判断>0
+文档输出 = 文档匹配(读文档规则,目标文件)
+内容汇总[文件指针] = 文档输出
+最后word = 目标文件
+Else
+ 
+End If
+表格判断 = InStr(目标文件,".xls",1,false)
+If 表格判断>0
+表格输出 = 表格匹配(读表格规则,目标文件)
+内容汇总[文件指针] = 表格输出
+Else
+ 
+End If
+Next
+If 最后word<>""
+word清空 = Word.Open(最后word,"","",true)
+Word.Close(word清空,true)
+Else
+ 
+End If
+根据规则录入台账(内容汇总,台账,台账工作表,功能1_时间关键字,功能1_时间递增,功能1_录入起始行,功能1_续写序号列,功能1_自定义公式,功能1_自定义公式列)
+Else
+ 
+End If
+//============================================================================================================================================================
+If m = "2"
+    Rem 操作步骤：1选目标文件，2弹出配置表，3选处理方案，4判断方案是否合规并准备模板文件，5是否删减
+总表导出规则工作表  = "功能2配置"
+目标总表 = Dialog.OpenFile(功能2_打开路径,"","选择需要读取的表格文件")
+If 目标总表=""
+exit()
+ 
+Else
+End If
+目标总表 = Excel.OpenExcel(目标总表,true)
+Delay(1000)
+Excel.ActiveBook(配置表)
+Excel.ActiveSheet(配置表,总表导出规则工作表)
+读总表导出规则  = []
+    读总表导出规则 = 读表格全部内容(配置表,总表导出规则工作表)
+读总表规则序号  = "输入数字"
+Do While 读总表规则序号 = "输入数字" 
+    读总表规则序号 = Dialog.InputBox("输入序号以选择需要匹配的规则","","输入数字",true)
+Loop
+If 读总表规则序号 = null
+    exit()
+Else
+ 
+End If
+    读总表规则序号 = CInt(读总表规则序号)
+读总表导出规则  = 读总表导出规则[读总表规则序号]
+功能2_输出模板 = 读总表导出规则[3]
+功能2_输出工作表名称 = 读总表导出规则[10]
+功能2_输出现有表格路径 = 读总表导出规则[11]
+功能2_输出新文件路径 = 读总表导出规则[12]
+If 功能2_输出新文件路径<>""
+ 
+Excel.SaveOtherFile(配置表,功能2_输出新文件路径&"模板副本.xls")
+Excel.CloseExcel(配置表,true)
+模板表 = Excel.OpenExcel(功能2_输出新文件路径&"模板副本.xls",true)
+模板表工作表 = Excel.GetSheetsName(模板表)
+For Each 工作表名 In 模板表工作表
+If 工作表名<>功能2_输出模板
+ 
+Excel.DeleteSheet(模板表,工作表名,true)
+Else
+ 
+End If
+ 
+Next
+If 功能2_输出工作表名称<>""
+Excel.SheetRename(模板表,功能2_输出模板,功能2_输出工作表名称,true)
+ 
+Else
+ 
+Excel.SheetRename(模板表,功能2_输出模板,"Sheet1",true)
+End If
+Delay(1000)
+Excel.ActiveBook(目标总表)
+配置表 = Excel.OpenExcel(配置表路径,true)
+输出目标 = 模板表
+Else
+ 
+If 功能2_输出现有表格路径<>""
+现有表格 = Excel.OpenExcel(功能2_输出现有表格路径,true)
+输出目标 = 现有表格
+ 
+Else
+ 
+End If
+End If
+根据模板规则读表导出(配置表,读总表导出规则,目标总表,输出目标)
+File.Delete(功能2_输出新文件路径&"模板副本.xls")
+End If
+If m = "3"
+Rem  读取表格，根据配置要求改写内容
+获取文件路径 = Dialog.OpenFile("C:\\Users\\Administrator\\Desktop\\","","选择一个文件以获得其文件路径，方便配置表填写")
+If 获取文件路径=""
+exit()
+ 
+Else
+ 
+End If
+//TracePrint("获取到的文件路径为："&获取文件路径)
+功能0_打开路径 = Excel.OpenExcel(获取文件路径,true)
+获取文件工作表 = Excel.GetSheetsName(功能0_打开路径)
+//TracePrint(功能0_打开路径)
+
+Else
+ 
+End If
+
+If m = "0"
+Excel.CloseExcel(配置表,false)
+Rem      打开表格，输入时间段和列，返回该列不同内容数量
+获取文件路径 = Dialog.OpenFile("C:\\Users\\Administrator\\Desktop\\","","选择一个文件以获得其文件路径，方便配置表填写")
+If 获取文件路径=""
+exit()
+ 
+Else
+ 
+End If
+//TracePrint("获取到的文件路径为："&获取文件路径)
+功能0_打开路径 = Excel.OpenExcel(获取文件路径,true)
+获取文件工作表 = Excel.GetSheetsName(功能0_打开路径)
+//TracePrint(功能0_打开路径)
+
+Else
+ 
+End If
+写入txt集合 = Join(写入txt集合,"\n")
+File.Write(txt配置路径,写入txt集合,"gbk")
+
+
